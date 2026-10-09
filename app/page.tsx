@@ -11,43 +11,55 @@ const WHY_ICONS = [Handshake, Users, PackageCheck, GraduationCap, CalendarClock]
 const ADV_ICONS = [Award, Target, TrendingUp];
 
 export default function Home() {
-  const [lead, last] = [HERO.title.replace(/ Trucking$/, ''), 'Trucking'];
+  // first sentence is emphasised, as in the design
+  const dot = HERO.text.indexOf('. ');
+  const leadSentence = HERO.text.slice(0, dot + 1);
+  const restText = HERO.text.slice(dot + 2);
   return (
     <>
-      <SceneConfig chapters={[0.5, 6.5]} />
+      <SceneConfig />
 
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="container hero-inner">
-          <p className="mono-strip" data-reveal>
-            <span>NATIONWIDE FREIGHT SOLUTIONS</span>
-            <span aria-hidden="true">·</span>
+      <section className="hero hero-home" aria-labelledby="hero-title">
+        <div className="container hero-home-inner">
+          <p className="hero-strip" data-reveal>
+            <span className="hero-strip-lead">
+              <span className="live-dot" aria-hidden="true" />
+              NATIONWIDE FREIGHT SOLUTIONS
+            </span>
             <span>24/7 SERVICE</span>
-            <span aria-hidden="true">·</span>
             <span>{COMPANY.ids}</span>
           </p>
-          <h1 id="hero-title" className="h1 on-scene" data-reveal style={{ ['--d' as string]: '.08s' }}>
-            {lead} <em className="mint">{last}</em>
+          <h1 id="hero-title" className="h1 hero-title on-scene" data-reveal style={{ ['--d' as string]: '.08s' }}>
+            <span className="hl-line">Setting New</span> <span className="hl-line">Standards in</span>{' '}
+            <em className="mint hl-line">Trucking</em>
           </h1>
-          <p className="lead on-scene" data-reveal style={{ ['--d' as string]: '.16s' }}>
-            {HERO.text}
-          </p>
-          <div className="btn-row" data-reveal style={{ ['--d' as string]: '.24s' }}>
-            <Btn href="/apply-now">Join Us</Btn>
-            <Btn href="/#about" variant="ghost">
-              About Us
-            </Btn>
+          <div className="hero-bottom">
+            <div className="hero-copy">
+              <p className="lead on-scene" data-reveal style={{ ['--d' as string]: '.16s' }}>
+                <strong>{leadSentence}</strong> {restText}
+              </p>
+              <div className="btn-row" data-reveal style={{ ['--d' as string]: '.24s' }}>
+                <Btn href="/apply-now">Join Us</Btn>
+                <Btn href="/about" variant="ghost" arrow={false}>
+                  About Us
+                </Btn>
+              </div>
+            </div>
+            <ul className="hero-stats" data-reveal style={{ ['--d' as string]: '.32s' }}>
+              <li className="glass card-dark">
+                <strong>300+</strong>
+                <span>BROKERS</span>
+              </li>
+              <li className="glass card-dark">
+                <strong>80+</strong>
+                <span>DRIVERS</span>
+              </li>
+              <li className="glass card-dark">
+                <strong className="mint">24/7</strong>
+                <span>SERVICE</span>
+              </li>
+            </ul>
           </div>
-          <ul className="stat-chips" data-reveal style={{ ['--d' as string]: '.32s' }}>
-            <li className="glass">
-              <strong>300+</strong> BROKERS
-            </li>
-            <li className="glass">
-              <strong>50+</strong> DRIVERS
-            </li>
-            <li className="glass">
-              <strong>24/7</strong> SERVICE
-            </li>
-          </ul>
         </div>
       </section>
 
@@ -169,7 +181,7 @@ export default function Home() {
             <p className="on-scene" data-reveal style={{ ['--d' as string]: '.14s' }}>
               {ABOUT.p2}
             </p>
-            <div data-reveal style={{ ['--d' as string]: '.2s' }}>
+            <div className="btn-row" data-reveal style={{ ['--d' as string]: '.2s' }}>
               <Btn href="/apply-now">BECOME A PARTNER</Btn>
             </div>
           </div>

@@ -15,6 +15,12 @@ export interface TractorModel {
   object: THREE.Object3D;
   /** Where the trailer's front face should sit (negative x). */
   trailerX: number;
+  /** Headlight lens position (z is mirrored for the other side). */
+  lamps: THREE.Vector3;
+  /** The model has emissive lenses of its own, so only the soft halo is added. */
+  ownLenses: boolean;
+  /** Front indicator position on the outer edge of the headlight unit (z mirrored). */
+  indicator: THREE.Vector3;
 }
 
 /** Normalise a glTF tractor (any forward axis along its longest horizontal extent) to the rig convention. */
@@ -38,7 +44,20 @@ export function normaliseTractor(src: THREE.Object3D, frontIsPositive: boolean, 
   box = new THREE.Box3().setFromObject(pivot);
   pivot.position.set(-box.max.x, -box.min.y, -(box.max.z + box.min.z) / 2);
   // fifth wheel sits ~80% back; trailer nose overhangs slightly ahead of it
-  return { object: holder, trailerX: -length * 0.86 };
+  // the model's own headlight lenses (material "headlight_lens") glow; find them to anchor the halos
+  holder.updateMatrixWorld(true);
+  const lensBox = new THREE.Box3();
+  holder.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (m.isMesh && (Array.isArray(m.material) ? m.material : [m.material]).some((x) => x.name === 'headlight_lens')) lensBox.expandByObject(m);
+  });
+  const lamps = lensBox.isEmpty()
+    ? new THREE.Vector3(-0.12, 1.18, 0.98)
+    : new THREE.Vector3(lensBox.max.x + 0.02, (lensBox.min.y + lensBox.max.y) / 2, Math.max(0.3, lensBox.max.z - 0.22));
+  const indicator = lensBox.isEmpty()
+    ? new THREE.Vector3(-0.3, 1.15, 1.2)
+    : new THREE.Vector3(lensBox.min.x + 0.12, (lensBox.min.y + lensBox.max.y) / 2, lensBox.max.z + 0.01);
+  return { object: holder, trailerX: -length * 0.86, lamps, ownLenses: !lensBox.isEmpty(), indicator };
 }
 
 function box(w: number, h: number, d: number, x: number, y: number, z: number) {
@@ -174,46 +193,82 @@ function buildTruckKit(aniso: number) {
   };
 }
 
-/** Additive light cone pointing along +x from origin. */
-function coneMaterial() {
-  return new THREE.ShaderMaterial({
-    uniforms: { uInt: { value: 1 } },
-    vertexShader: /* glsl */ `
-      varying float vAlong; varying vec3 vN; varying vec3 vV;
-      void main(){
-        vAlong = clamp(position.x / 18., 0., 1.);
-        vec4 mv = modelViewMatrix * vec4(position,1.);
-        vN = normalize(normalMatrix * normal);
-        vV = normalize(-mv.xyz);
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: /* glsl */ `
-      uniform float uInt;
-      varying float vAlong; varying vec3 vN; varying vec3 vV;
-      void main(){
-        float edge = pow(abs(dot(normalize(vN), normalize(vV))), 1.6);
-        float a = (1. - vAlong) * (1. - vAlong) * edge * .16 * uInt * smoothstep(0., .06, vAlong);
-        gl_FragColor = vec4(vec3(1., .93, .78) * a, 1.);
-      }`,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    side: THREE.DoubleSide,
-  });
+/**
+ * Headlight light on the asphalt: two soft beams that start at the bumper and widen
+ * forward (≈12° spread), fading with distance. Drawn once into a small canvas.
+ * U runs forward (0 → 1 = 0 → 24 m), V across the road (0 → 1 = 4 m left → 4 m right).
+ */
+function headlightPoolTexture() {
+  const W = 256, H = 128;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d')!;
+  const img = g.createImageData(W, H);
+  const LEN = 24, HALF_W = 4, LAMP = 0.95, SPREAD = Math.tan(0.21);
+  for (let j = 0; j < H; j++) {
+    const z = (j / (H - 1) - 0.5) * 2 * HALF_W;
+    for (let i = 0; i < W; i++) {
+      const x = (i / (W - 1)) * LEN;
+      // near the bumper the pool is faint (lamps aim down the road), peaks a few metres out, then falls off
+      const along = Math.min(1, x / 3.5) ** 1.5 * Math.exp(-Math.max(0, x - 3.5) / 9);
+      let v = 0;
+      for (const side of [-1, 1]) {
+        const width = 0.35 + x * SPREAD;
+        const d = (z - side * LAMP) / width;
+        v += Math.exp(-d * d * 1.6);
+      }
+      const a = Math.min(1, along * v * 0.85);
+      const k = (j * W + i) * 4;
+      img.data[k] = 255;
+      img.data[k + 1] = 236;
+      img.data[k + 2] = 200;
+      img.data[k + 3] = Math.round(a * 255);
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
-function poolTexture() {
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 128;
-  const g = c.getContext('2d')!;
-  const grd = g.createRadialGradient(40, 64, 4, 90, 64, 150);
-  grd.addColorStop(0, 'rgba(255,236,200,.9)');
-  grd.addColorStop(0.4, 'rgba(255,226,180,.35)');
-  grd.addColorStop(1, 'rgba(255,220,170,0)');
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 256, 128);
-  return new THREE.CanvasTexture(c);
+/**
+ * Give one rig's headlight its indicator section: the outer wrap-around end of the
+ * "headlight_lens" turns amber and flashes with uHazard. The material is cloned so only
+ * that rig flashes. The zone is defined in the tractor's normalised space (front +x, lateral z).
+ */
+function makeIndicatorLens(root: THREE.Object3D, model: TractorModel) {
+  const uniforms = { uHazard: { value: 0 }, uToLocal: { value: new THREE.Matrix4() } };
+  const zOuter = model.indicator.z - 0.01; // outer edge of the lens
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    if (!mats.some((x) => x.name === 'headlight_lens')) return;
+    const mat = (mats[0] as THREE.MeshStandardMaterial).clone();
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, uniforms, { uZ0: { value: zOuter - 0.24 }, uZ1: { value: zOuter - 0.13 } });
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vHzWorld;')
+        .replace('#include <project_vertex>', '#include <project_vertex>\nvHzWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vHzWorld;\nuniform float uHazard, uZ0, uZ1;\nuniform mat4 uToLocal;')
+        .replace(
+          '#include <emissivemap_fragment>',
+          [
+            '#include <emissivemap_fragment>',
+            'vec3 hzLocal = (uToLocal * vec4(vHzWorld, 1.0)).xyz;',
+            'float hzZone = smoothstep(uZ0, uZ1, abs(hzLocal.z));',
+            '// indicator section: dim amber glass when idle, bright amber while flashing',
+            'totalEmissiveRadiance = mix(totalEmissiveRadiance, mix(vec3(0.22, 0.11, 0.02), vec3(3.4, 1.6, 0.18), uHazard), hzZone);',
+            'diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 0.55, 0.1), hzZone);',
+          ].join('\n'),
+        );
+    };
+    mat.customProgramCacheKey = () => 'indicator-lens';
+    m.material = mat;
+  });
+  return { uniforms, holder: root };
 }
 
 export interface Traffic {
@@ -221,6 +276,8 @@ export interface Traffic {
   hero: THREE.Group;
   /** Swap the procedural cab for a loaded tractor on the hero rig, the traffic, or all rigs. */
   useModel(model: TractorModel, which: 'hero' | 'traffic' | 'all'): void;
+  /** QA readout of the hazard flasher state */
+  hazardDebug(): Record<string, number>;
   update(t: number, dt: number, heroX: number): void;
   dispose(): void;
 }
@@ -253,7 +310,7 @@ export function createHighway(physical: boolean, aniso: number, glow: THREE.Text
   rtex.repeat.set(L / 14, 1);
   const roadGeo = new THREE.PlaneGeometry(L, 8.6);
   roadGeo.rotateX(-Math.PI / 2);
-  const roadMat = new THREE.MeshStandardMaterial({ map: rtex, roughness: 0.55, metalness: 0.05, color: '#a8bdd2' });
+  const roadMat = new THREE.MeshStandardMaterial({ map: rtex, roughness: 0.6, metalness: 0.05, color: '#62758c' }); // packed-snow asphalt, dark enough at night for headlights to read
   const road = new THREE.Mesh(roadGeo, roadMat);
   road.position.set(0, ROAD_Y + 0.02, SHELF_Z);
   group.add(road);
@@ -291,46 +348,91 @@ export function createHighway(physical: boolean, aniso: number, glow: THREE.Text
   // trucks
   const kit = buildTruckKit(aniso);
   disposables.push(kit);
-  const coneGeo = new THREE.ConeGeometry(3.2, 18, 18, 1, true);
-  coneGeo.rotateZ(Math.PI / 2); // apex now at -x
-  coneGeo.translate(9, 0, 0); // apex at the lamp, opening toward +x
-  const coneMat = coneMaterial();
-  const poolTex = poolTexture();
-  const poolMat = new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.55, color: '#ffe8c4' });
-  const poolGeo = new THREE.PlaneGeometry(22, 8);
+  // headlights: the lamp itself glows (bright lens + a tight halo), no beams or road glare
+  const lensGeo = new THREE.PlaneGeometry(0.34, 0.16);
+  lensGeo.rotateY(Math.PI / 2); // face +x
+  const lensMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.5, 1.3), toneMapped: false, side: THREE.DoubleSide });
+  const haloMat = new THREE.SpriteMaterial({ map: glow, color: '#fff1d6', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.45 });
+  const poolTex = headlightPoolTexture();
+  const poolGeo = new THREE.PlaneGeometry(24, 8);
   poolGeo.rotateX(-Math.PI / 2);
-  poolGeo.translate(9, 0, 0);
-  const headMat = new THREE.SpriteMaterial({ map: glow, color: '#fff3dc', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
-  const tailMat = new THREE.SpriteMaterial({ map: glow, color: '#ff3a2a', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.8 });
-  disposables.push(coneGeo, coneMat, poolTex, poolMat, poolGeo, headMat, tailMat);
+  poolGeo.translate(12 + 0.2, 0, 0); // starts at the bumper, reaches 24 m ahead
+  const poolMat = new THREE.MeshBasicMaterial({
+    map: poolTex,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    opacity: 0.8,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+  });
+  disposables.push(lensGeo, lensMat, haloMat, poolTex, poolGeo, poolMat);
+
+  // trailer lamps: round lenses mounted flush in the panels (nothing sticks out of the bodywork)
+  const tailLensMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.4, 0.08, 0.05), toneMapped: false });
+  const amberOffMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.32, 0.17, 0.04), toneMapped: false });
+  const amberLensMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.32, 0.17, 0.04), toneMapped: false }); // hero, flashes
+  const bezelMat = new THREE.MeshStandardMaterial({ color: '#1a1d22', roughness: 0.5, metalness: 0.6 });
+  const lensDisk = new THREE.CircleGeometry(0.075, 20);
+  const bezelDisk = new THREE.RingGeometry(0.075, 0.095, 20);
+  const markerDisk = new THREE.CircleGeometry(0.035, 14);
+  disposables.push(tailLensMat, amberOffMat, amberLensMat, bezelMat, lensDisk, bezelDisk, markerDisk);
+  /** a lens disk lying flat on a panel, facing `normal` */
+  const flushLamp = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, normal: THREE.Vector3, bezel = true) => {
+    const g = new THREE.Group();
+    g.position.set(x, y, z);
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal); // CircleGeometry faces +z
+    g.add(new THREE.Mesh(geo, mat));
+    if (bezel) g.add(new THREE.Mesh(bezelDisk, bezelMat));
+    return g;
+  };
+  const BACK = new THREE.Vector3(-1, 0, 0);
+  const PROC_LAMPS = new THREE.Vector3(0.07, 1.12, 0.9);
 
   const models = new Set<THREE.Object3D>();
-  type Rig = { obj: THREE.Group; lane: number; x: number; speed: number; tractor: THREE.Group; trailer: THREE.Group; model?: THREE.Object3D };
+  let parkedFor = 0;
+  let heroLens: ReturnType<typeof makeIndicatorLens> | null = null;
+  type Rig = { obj: THREE.Group; lane: number; x: number; speed: number; v?: number; tractor: THREE.Group; trailer: THREE.Group; lamps: THREE.Object3D[]; indicators: THREE.Object3D[]; model?: THREE.Object3D };
   const rigs: Rig[] = [];
   for (let i = 0; i < count; i++) {
     const obj = new THREE.Group();
     const parts = kit.make();
     obj.add(parts.tractor, parts.trailer);
-    for (const zs of [0.95, -0.95]) {
-      const h = new THREE.Sprite(headMat);
-      h.position.set(0.25, 0.95, zs);
-      h.scale.setScalar(1.6);
-      obj.add(h);
-      const tl = new THREE.Sprite(tailMat);
-      tl.position.set(-TRAILER_LEN - 0.05, 1.3, zs * 1.2);
-      tl.scale.setScalar(0.7);
-      parts.trailer.add(tl);
+    const lamps: THREE.Object3D[] = [];
+    for (const side of [1, -1]) {
+      const lamp = new THREE.Group();
+      lamp.position.set(PROC_LAMPS.x, PROC_LAMPS.y, PROC_LAMPS.z * side);
+      lamp.add(new THREE.Mesh(lensGeo, lensMat));
+      const halo = new THREE.Sprite(haloMat);
+      halo.position.x = 0.04;
+      halo.scale.setScalar(0.55);
+      lamp.add(halo);
+      obj.add(lamp);
+      lamps.push(lamp);
+      // rear cluster on the trailer's back panel: red tail + amber turn, flush with the doors
+      const rear = -TRAILER_LEN - 0.006;
+      const turnMat = i === 0 ? amberLensMat : amberOffMat;
+      parts.trailer.add(flushLamp(lensDisk, tailLensMat, rear, 1.36, side * 1.08, BACK));
+      parts.trailer.add(flushLamp(lensDisk, turnMat, rear, 1.36, side * 0.86, BACK));
+      // amber side marker on the lower rail, flush with the side panel
+      parts.trailer.add(flushLamp(markerDisk, turnMat, -TRAILER_LEN * 0.5, 1.32, side * 1.306, new THREE.Vector3(0, 0, side), false));
     }
-    const cone = new THREE.Mesh(coneGeo, coneMat);
-    cone.position.set(0.3, 0.95, 0);
-    cone.rotation.z = -0.07;
-    obj.add(cone);
-    const pool = new THREE.Mesh(poolGeo, poolMat);
-    pool.position.set(0.2, 0.04, 0);
-    obj.add(pool);
     // hero owns the +x lane (scroll-driven); traffic flows the other way
+    const indicators: THREE.Object3D[] = [];
+    if (i === 0) {
+      // procedural cab only: amber disks flush on the front corners (the GLB flashes part of its own lamp)
+      for (const side of [1, -1]) {
+        const front = flushLamp(markerDisk, amberLensMat, 0.075, 1.12, 1.12 * side, new THREE.Vector3(1, 0, 0.6 * side).normalize(), false);
+        obj.add(front);
+        indicators.push(front);
+      }
+    }
+    const pool = new THREE.Mesh(poolGeo, poolMat);
+    pool.position.y = 0.05; // just above the road surface (rig origin sits on the road)
+    pool.renderOrder = 2;
+    obj.add(pool);
     const lane = i === 0 ? 0 : 1;
-    const rig: Rig = { obj, lane, x: -300 + Math.random() * 600, speed: 14 + Math.random() * 8, tractor: parts.tractor, trailer: parts.trailer };
+    const rig: Rig = { obj, lane, x: -300 + Math.random() * 600, speed: 14 + Math.random() * 8, tractor: parts.tractor, trailer: parts.trailer, lamps, indicators };
     obj.position.set(rig.x, ROAD_Y, LANES[lane]);
     obj.rotation.y = lane === 0 ? 0 : Math.PI;
     group.add(obj);
@@ -342,6 +444,10 @@ export function createHighway(physical: boolean, aniso: number, glow: THREE.Text
   return {
     group,
     hero: rigs[0].obj,
+    hazardDebug: () => {
+      const p = rigs[0].indicators[0]?.getWorldPosition(new THREE.Vector3());
+      return { hazardOpacity: +(heroLens ? heroLens.uniforms.uHazard.value : 0).toFixed(2), parkedFor: +parkedFor.toFixed(2), indX: +(p?.x ?? 0).toFixed(2), indY: +(p?.y ?? 0).toFixed(2), indZ: +(p?.z ?? 0).toFixed(2), heroX: +rigs[0].x.toFixed(2) };
+    },
     useModel(model, which) {
       models.add(model.object);
       rigs.forEach((r, i) => {
@@ -352,14 +458,47 @@ export function createHighway(physical: boolean, aniso: number, glow: THREE.Text
         r.obj.add(r.model);
         r.tractor.visible = false;
         r.trailer.position.x = model.trailerX;
+        r.indicators.forEach((l) => (l.visible = !model.ownLenses));
+        if (i === 0 && which !== 'traffic' && model.ownLenses && r.model) heroLens = makeIndicatorLens(r.model, model);
+        r.lamps.forEach((l, k) => {
+          l.position.set(model.lamps.x, model.lamps.y, model.lamps.z * (k === 0 ? 1 : -1));
+          // the model's own lenses glow; the procedural plate and halo would float off the bodywork
+          l.visible = !model.ownLenses;
+        });
       });
     },
     update(t, dt, heroX) {
+      // hero is "parked" when the page isn't being scrolled: hazards flash (~75 per minute)
+      const hero = rigs[0];
+      const v = Math.abs(heroX - hero.x) / Math.max(dt, 1e-3);
+      parkedFor = v < 0.4 ? parkedFor + dt : 0;
+      const parked = Math.min(1, Math.max(0, (parkedFor - 0.6) / 0.3));
+      const ph = (t % 0.8) / 0.8;
+      const on = ph < 0.5 ? Math.min(1, ph / 0.04) : Math.max(0, 1 - (ph - 0.5) / 0.06);
+      const k = parked * on;
+      amberLensMat.color.setRGB(0.32 + 1.6 * k, 0.17 + 0.83 * k, 0.04 + 0.12 * k);
+      if (heroLens) {
+        heroLens.uniforms.uHazard.value = k;
+        heroLens.uniforms.uToLocal.value.copy(heroLens.holder.matrixWorld).invert();
+      }
       rigs.forEach((r, i) => {
         if (i === 0) {
           r.x = heroX;
         } else {
-          r.x += (r.lane === 0 ? 1 : -1) * r.speed * dt;
+          // keep a safe gap behind the rig ahead in the same lane instead of driving through it
+          const dir = r.lane === 0 ? 1 : -1;
+          let gap = Infinity, leader: Rig | null = null;
+          for (const o of rigs) {
+            if (o === r || o.lane !== r.lane) continue;
+            const d = (((o.x - r.x) * dir) % 660 + 660) % 660; // distance ahead, wrapping the loop
+            if (d < gap) {
+              gap = d;
+              leader = o;
+            }
+          }
+          const want = leader && gap < 60 ? Math.min(r.speed, (leader.v ?? leader.speed) * Math.max(0, (gap - 28) / 32)) : r.speed;
+          r.v = (r.v ?? r.speed) + (want - (r.v ?? r.speed)) * Math.min(1, dt * 1.5);
+          r.x += dir * r.v * dt;
           if (r.x > 330) r.x -= 660;
           if (r.x < -330) r.x += 660;
         }

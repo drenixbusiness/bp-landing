@@ -19,7 +19,7 @@ doc.setAuthor('Bipolar Bear Enterprises LLC');
 const bold = await doc.embedFont(StandardFonts.HelveticaBold);
 const reg = await doc.embedFont(StandardFonts.Helvetica);
 const mono = await doc.embedFont(StandardFonts.Courier);
-const logo = await doc.embedPng(await readFile('public/img/logo-white.png'));
+const logo = await doc.embedPng(await readFile('public/img/logo-on-dark.png'));
 const jpg = async (p, w, h) => doc.embedJpg(await sharp(p).resize(w, h, { fit: 'cover' }).jpeg({ quality: 80 }).toBuffer());
 const hero = await jpg('public/img/svc-dispatch.webp', 1280, 720);
 const fuel = await jpg('public/img/svc-fuel.webp', 600, 720);
@@ -48,7 +48,7 @@ function para(p, text, x, y, { font = reg, size = 18, color = C.ice, max = 500, 
   wrap(text, font, size, max).forEach((l, i) => p.drawText(l, { x, y: y - i * size * lh, size, font, color }));
 }
 function footer(p, n) {
-  p.drawImage(logo, { x: 60, y: 36, width: 150, height: 32 });
+  p.drawImage(logo, { x: 60, y: 30, width: 170, height: 36 });
   p.drawText('MC# 1031523 • US DOT# 3268702   ·   +1 (601) 427 1757   ·   info@bipolar-bear.com', { x: 240, y: 46, size: 12, font: mono, color: C.muted });
   p.drawText(String(n).padStart(2, '0'), { x: W - 90, y: 46, size: 12, font: mono, color: C.mint });
 }

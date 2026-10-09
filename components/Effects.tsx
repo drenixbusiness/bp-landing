@@ -18,13 +18,15 @@ export default function Effects() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) {
+          // 8% visible — or, for blocks taller than the screen (the privacy text), a quarter of the viewport
+          const vh = e.rootBounds?.height ?? window.innerHeight;
+          if (e.isIntersecting && (e.intersectionRatio >= 0.08 || e.intersectionRect.height >= vh * 0.25)) {
             e.target.classList.add('in');
             io.unobserve(e.target);
           }
         }
       },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+      { rootMargin: '0px 0px -8% 0px', threshold: [0, 0.02, 0.05, 0.08] },
     );
     const scan = () => document.querySelectorAll('[data-reveal]:not(.in)').forEach((el) => io.observe(el));
     scan();

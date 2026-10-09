@@ -1,42 +1,117 @@
 [
   {
-    "id": "pb-579-2021",
-    "model": "Peterbilt 579",
+    "id": "1",
     "year": 2021,
-    "location": "Jackson, MS",
-    "mileage": 412000,
-    "engine": "PACCAR MX-13, 455 hp",
-    "transmission": "Eaton Fuller 10-speed manual",
-    "photos": ["/img/svc-dispatch.webp", "/img/svc-insurance.webp"]
+    "model": "Freightliner",
+    "condition": "Good",
+    "pay": "30% Gross / $0.70 CPM",
+    "location": "IL",
+    "locationName": "Illinois",
+    "status": "Available",
+    "features": [
+      "Fridge",
+      "Microwave",
+      "New Mattres",
+      "Ryder Pet policy",
+      "Transportation is covered"
+    ],
+    "photos": [
+      "https://img.bipolar-bear.com/assets/truck-1-1.webp",
+      "https://img.bipolar-bear.com/assets/truck-1-2.webp",
+      "https://img.bipolar-bear.com/assets/truck-1-3.webp",
+      "https://img.bipolar-bear.com/assets/truck-1-4.webp"
+    ]
   },
   {
-    "id": "fl-cascadia-2022",
-    "model": "Freightliner Cascadia",
-    "year": 2022,
-    "location": "Columbus, OH",
-    "mileage": 298500,
-    "engine": "Detroit DD15, 505 hp",
-    "transmission": "Detroit DT12 automated",
-    "photos": ["/img/svc-insurance.webp", "/img/svc-fuel.webp", "/img/about-2.webp"]
-  },
-  {
-    "id": "fl-cascadia-2020",
-    "model": "Freightliner Cascadia",
+    "id": "2",
     "year": 2020,
-    "location": "Jacksonville, FL",
-    "mileage": 486200,
-    "engine": "Detroit DD15, 455 hp",
-    "transmission": "Detroit DT12 automated",
-    "photos": ["/img/svc-fuel.webp", "/img/svc-insurance.webp"]
+    "model": "Volvo",
+    "condition": "Good",
+    "pay": "30% Gross / $0.70 CPM",
+    "location": "GA",
+    "locationName": "Georgia",
+    "status": "Available",
+    "features": [
+      "Fridge",
+      "Microwave",
+      "New Mattres",
+      "Ryder Pet policy",
+      "Transportation is covered"
+    ],
+    "photos": [
+      "https://img.bipolar-bear.com/assets/truck-2-1.webp",
+      "https://img.bipolar-bear.com/assets/truck-2-2.webp",
+      "https://img.bipolar-bear.com/assets/truck-2-3.webp",
+      "https://img.bipolar-bear.com/assets/truck-2-4.webp"
+    ]
   },
   {
-    "id": "pb-389-2019",
-    "model": "Peterbilt 389",
-    "year": 2019,
-    "location": "Jackson, MS",
-    "mileage": 538900,
-    "engine": "Cummins X15, 565 hp",
-    "transmission": "Eaton Fuller 13-speed manual",
-    "photos": ["/img/svc-dispatch.webp", "/img/about-2.webp"]
+    "id": "3",
+    "year": 2020,
+    "model": "Volvo",
+    "condition": "Good",
+    "pay": "30% Gross / $0.70 CPM",
+    "location": "MD",
+    "locationName": "Maryland",
+    "status": "Available",
+    "features": [
+      "Fridge",
+      "Microwave",
+      "New Mattres",
+      "Ryder Pet policy",
+      "Transportation is covered"
+    ],
+    "photos": [
+      "https://img.bipolar-bear.com/assets/truck-3-1.webp",
+      "https://img.bipolar-bear.com/assets/truck-3-2.webp",
+      "https://img.bipolar-bear.com/assets/truck-3-3.webp",
+      "https://img.bipolar-bear.com/assets/truck-3-4.webp"
+    ]
+  },
+  {
+    "id": "4",
+    "year": 2020,
+    "model": "Freightliner",
+    "condition": "Good",
+    "pay": "30% Gross / $0.70 CPM",
+    "location": "GA",
+    "locationName": "Georgia",
+    "status": "Available",
+    "features": [
+      "Fridge",
+      "Microwave",
+      "New Mattres",
+      "Ryder Pet policy",
+      "Transportation is covered"
+    ],
+    "photos": [
+      "https://img.bipolar-bear.com/assets/truck-4-1.webp",
+      "https://img.bipolar-bear.com/assets/truck-4-2.webp",
+      "https://img.bipolar-bear.com/assets/truck-4-3.webp",
+      "https://img.bipolar-bear.com/assets/truck-4-4.webp"
+    ]
+  },
+  {
+    "id": "5",
+    "year": 2023,
+    "model": "Peterbilt",
+    "condition": "Good",
+    "pay": "30% Gross / $0.70 CPM",
+    "location": "RI",
+    "locationName": "Rhode Island",
+    "status": "Available",
+    "features": [
+      "Fridge",
+      "Microwave",
+      "New Mattres",
+      "Ryder Pet policy",
+      "Transportation is covered"
+    ],
+    "photos": [
+      "https://img.bipolar-bear.com/assets/truck-5-1.webp",
+      "https://img.bipolar-bear.com/assets/truck-5-2.webp",
+      "https://img.bipolar-bear.com/assets/truck-5-3.webp",
+      "https://img.bipolar-bear.com/assets/truck-5-4.webp"
+    ]
   }
 ]

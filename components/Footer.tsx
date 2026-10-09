@@ -4,7 +4,7 @@ import { COMPANY } from '@/lib/content';
 import { FacebookIcon, InstagramIcon, Logo } from './ui';
 
 const LINKS = [
-  { label: 'About Us', href: '/#about' },
+  { label: 'About Us', href: '/about' },
   { label: 'Services', href: '/service' },
   { label: 'Our Partners', href: '/#partners' },
   { label: 'FAQ', href: '/#faq' },

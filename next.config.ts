@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // truck photos for the catalog
+    remotePatterns: [{ protocol: 'https', hostname: 'img.bipolar-bear.com', pathname: '/assets/**' }],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   async headers() {

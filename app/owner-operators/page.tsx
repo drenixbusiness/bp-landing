@@ -1,16 +1,15 @@
 import type { Metadata } from 'next';
-import { BadgeDollarSign, CalendarCheck, Download, Eye, Handshake, Headset, ListChecks, Route, ShieldCheck, UserRound } from 'lucide-react';
+import { BadgeDollarSign, CalendarCheck, Download, Eye, Handshake, Headset, Route, ShieldCheck, UserRound } from 'lucide-react';
 import SceneConfig from '@/components/SceneConfig';
 import Faq from '@/components/Faq';
 import Calculator from '@/components/owner/Calculator';
 import OwnerNav from '@/components/owner/OwnerNav';
-import TiltCard from '@/components/owner/TiltCard';
 import { Btn, Kicker } from '@/components/ui';
 import { COMPANY } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Owner-Operators — Drive With BipolarBear',
-  description: 'Earn up to $13,000/week as an owner-operator with BipolarBear. Non-forced dispatch, pre-booked loads, a dedicated dispatcher and 24/7 support.',
+  description: 'Earn up to $14,000+/week as an owner-operator with BipolarBear. Non-forced dispatch, pre-booked loads, a dedicated dispatcher and 24/7 support.',
 };
 
 const BENEFITS = [
@@ -35,7 +34,7 @@ const OO_FAQ = [
 export default function OwnerOperatorsPage() {
   return (
     <>
-      <SceneConfig chapters={[0.5, 2.5, 1.5, 3.5, 4.5, 5.5, 6.5]} sections="[data-chapter]" />
+      <SceneConfig />
       <OwnerNav />
 
       <section className="hero oo-hero" data-chapter aria-labelledby="oo-h1">
@@ -47,12 +46,10 @@ export default function OwnerOperatorsPage() {
           </p>
           <h1 id="oo-h1" className="h1 on-scene oo-title" data-reveal style={{ ['--d' as string]: '.08s' }}>
             <span className="oo-line">Drive With</span>
-            <span className="wordmark" data-text="BipolarBear">
-              BipolarBear
-            </span>
+            <span className="mint">BipolarBear</span>
           </h1>
           <p className="lead on-scene" data-reveal style={{ ['--d' as string]: '.16s' }}>
-            Earn up to <strong className="mint">$13,000/week</strong> with non-forced dispatch, pre-booked loads and a dedicated dispatcher who works for you — 24/7.
+            Earn up to <strong className="mint">$14,000+/week</strong> with non-forced dispatch, pre-booked loads and a dedicated dispatcher who works for you — 24/7.
           </p>
           <div className="btn-row" data-reveal style={{ ['--d' as string]: '.24s' }}>
             <Btn href="#apply">Apply now</Btn>
@@ -62,10 +59,10 @@ export default function OwnerOperatorsPage() {
           </div>
           <ul className="stat-chips" data-reveal style={{ ['--d' as string]: '.32s' }}>
             <li className="glass">
-              <span className="chip-label">Weekly gross</span> <strong>$9,000–$13,000</strong>
+              <span className="chip-label">Weekly gross</span> <strong>$9,000–$14,000+</strong>
             </li>
             <li className="glass">
-              <strong>$2.50+</strong> per mile
+              <strong>$2.80+</strong> per mile
             </li>
           </ul>
         </div>
@@ -81,10 +78,10 @@ export default function OwnerOperatorsPage() {
           </div>
           <div className="earn-grid">
             {[
-              { n: '$9–13K', l: 'Weekly gross', t: 'Typical gross for an OTR owner-operator running consistent lanes with our dispatch.' },
-              { n: '$2.50+', l: 'Per mile', t: 'Rates negotiated across a network of more than 1,000+ brokers.' },
+              { n: '$9–14K +', l: 'Weekly gross', t: 'Typical gross for an OTR owner-operator running consistent lanes with our dispatch.' },
+              { n: '$2.80+', l: 'Per mile', t: 'Rates negotiated across a network of more than 1,000+ brokers.' },
               { n: '12%', l: 'Company fee', t: 'One flat fee for dispatch, logbook, billing & factoring and support.' },
-              { n: '3,200–5,000', l: 'Miles / week', t: 'Typical OTR range — pick the pace that fits your home time.' },
+              { n: '3.2–5K', l: 'Miles / week', t: 'Typical OTR range of 3,200–5,000 miles — pick the pace that fits your home time.' },
             ].map((e, i) => (
               <div key={e.l} className="earn-card glass card-dark" data-reveal style={{ ['--d' as string]: `${i * 0.08}s` }}>
                 <p className="earn-num">{e.n}</p>
@@ -106,15 +103,13 @@ export default function OwnerOperatorsPage() {
           </div>
           <div className="benefit-grid">
             {BENEFITS.map((b, i) => (
-              <TiltCard key={b.title} className="benefit" style={{ ['--d' as string]: `${(i % 4) * 0.07}s` }}>
-                <div className="benefit-card glass card-dark">
+              <div key={b.title} className="benefit-card glass card-dark" data-reveal style={{ ['--d' as string]: `${(i % 4) * 0.07}s` }}>
                   <span className="benefit-icon">
                     <b.icon size={22} strokeWidth={1.8} aria-hidden="true" />
                   </span>
                   <h3>{b.title}</h3>
                   <p>{b.text}</p>
-                </div>
-              </TiltCard>
+              </div>
             ))}
           </div>
         </div>
@@ -139,14 +134,13 @@ export default function OwnerOperatorsPage() {
       <section className="section oo-close" data-chapter aria-labelledby="oo-close">
         <div className="container">
           <div className="panel glass card-dark closing-panel" data-reveal>
-            <ListChecks size={28} className="mint" aria-hidden="true" />
             <h2 id="oo-close" className="h2">
-              Earn up to <span className="mint">$13,000/week.</span>
+              Earn up to <span className="mint">$14,000+/week.</span>
             </h2>
-            <p>Join 50+ drivers and owner-operators already running with BipolarBear.</p>
+            <p>Join 80+ drivers and owner-operators already running with BipolarBear.</p>
             <div className="btn-row center">
               <Btn href="#apply">Apply now</Btn>
-              <a href="/bipolarbear-owner-operators.pdf" className="btn btn-ghost" download>
+              <a href="/bipolarbear-owner-operators.pdf" className="btn btn-ghost" download="BipolarBear-Owner-Operators.pdf">
                 <Download size={17} aria-hidden="true" />
                 <span>Download Presentation (PDF)</span>
               </a>

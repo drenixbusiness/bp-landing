@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function ApplyPage() {
   return (
     <>
-      <SceneConfig chapters={[1.5, 2.5]} />
+      <SceneConfig />
       <section className="apply" aria-labelledby="apply-h1">
         <div className="container apply-grid">
           <div className="apply-text">

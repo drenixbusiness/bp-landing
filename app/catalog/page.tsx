@@ -1,14 +1,18 @@
 import type { Metadata } from 'next';
-import Catalog, { type Truck } from '@/components/Catalog';
+import Catalog from '@/components/Catalog';
 import { Kicker } from '@/components/ui';
-import trucks from '@/data/trucks.json';
+import { getTrucks } from '@/lib/trucks';
 
 export const metadata: Metadata = {
   title: 'Truck Catalog',
   description: 'Available trucks with photo gallery and truck details.',
 };
 
-export default function CatalogPage() {
+// the list comes from the Google Sheet; refresh it at most every 5 minutes
+export const revalidate = 300;
+
+export default async function CatalogPage() {
+  const trucks = await getTrucks();
   return (
     <>
       <section className="page-hero catalog-hero" aria-labelledby="cat-h1">
@@ -24,7 +28,7 @@ export default function CatalogPage() {
       </section>
       <section className="section catalog-sec">
         <div className="container">
-          <Catalog trucks={trucks as Truck[]} />
+          <Catalog trucks={trucks} />
         </div>
       </section>
     </>

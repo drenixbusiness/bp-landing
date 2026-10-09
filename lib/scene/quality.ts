@@ -3,7 +3,8 @@ export type Tier = 0 | 1 | 2; // 0 = low, 1 = mid, 2 = high
 export interface Quality {
   tier: Tier;
   maxDpr: number;
-  stars: number;
+  /** faintest catalog star shown (V magnitude; 6 ≈ naked-eye limit) */
+  starMag: number;
   snowFar: number;
   snowNear: number;
   floes: number;
@@ -37,14 +38,14 @@ export function detectTier(gl?: WebGLRenderingContext | WebGL2RenderingContext |
 
 export function qualityFor(tier: Tier, small: boolean): Quality {
   const q: Quality[] = [
-    { tier: 0, maxDpr: 1, stars: 7000, snowFar: 1600, snowNear: 420, floes: 30, trucks: 3, physical: false, skyOctaves: 3, reflectSize: [256, 64] },
-    { tier: 1, maxDpr: 1.5, stars: 12000, snowFar: 3200, snowNear: 900, floes: 55, trucks: 4, physical: true, skyOctaves: 4, reflectSize: [384, 96] },
-    { tier: 2, maxDpr: 1.75, stars: 22000, snowFar: 5200, snowNear: 1400, floes: 80, trucks: 6, physical: true, skyOctaves: 5, reflectSize: [512, 128] },
+    { tier: 0, maxDpr: 1, starMag: 5.2, snowFar: 1600, snowNear: 420, floes: 30, trucks: 3, physical: false, skyOctaves: 3, reflectSize: [256, 64] },
+    { tier: 1, maxDpr: 1.5, starMag: 5.7, snowFar: 3200, snowNear: 900, floes: 55, trucks: 4, physical: true, skyOctaves: 4, reflectSize: [384, 96] },
+    { tier: 2, maxDpr: 1.75, starMag: 6, snowFar: 5200, snowNear: 1400, floes: 80, trucks: 6, physical: true, skyOctaves: 5, reflectSize: [512, 128] },
   ];
   const out = { ...q[tier] };
   if (small) {
     out.maxDpr = Math.min(out.maxDpr, 1.5);
-    out.stars = Math.min(out.stars, 12000);
+    out.starMag = Math.min(out.starMag, 5.7);
   }
   return out;
 }

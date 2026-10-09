@@ -67,7 +67,7 @@ const COOKIES = [
 export default function PrivacyPage() {
   return (
     <>
-      <SceneConfig chapters={[4.5, 5.5]} veil={0.2} />
+      <SceneConfig veil={0.2} />
       <section className="page-hero" aria-labelledby="pp-h1">
         <div className="container">
           <Kicker>Legal</Kicker>
@@ -82,10 +82,10 @@ export default function PrivacyPage() {
 
       <section className="section policy-sec">
         <div className="container policy-grid">
-          <aside className="policy-aside">
+          <aside className="policy-aside" data-reveal>
             <Toc items={TOC} />
           </aside>
-          <article className="policy glass card-dark">
+          <article className="policy glass card-dark" data-reveal style={{ ['--d' as string]: '.08s' }}>
             <h2 id="data-collection">Data Collection</h2>
             <p>We collect personal information that may include, but is not limited to, the following data:</p>
             <ul>

@@ -3,8 +3,9 @@ import type { ComponentProps, ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export function Logo({ className = '' }: { className?: string }) {
+  // official logo, transparent; wordmark switched to white for the dark UI
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/img/logo-white.png" width={150} height={32} alt="Bipolar Bear" className={`logo ${className}`} />;
+  return <img src="/img/logo-on-dark.webp?v=2" width={160} height={34} alt="Bipolar Bear" className={`logo ${className}`} />;
 }
 
 type BtnProps = { href: string; variant?: 'primary' | 'ghost' | 'dark'; arrow?: boolean; children: ReactNode; className?: string } & Omit<ComponentProps<'a'>, 'href'>;

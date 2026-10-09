@@ -3,21 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Camera, ChevronLeft, ChevronRight, Gauge, MapPin, Phone, X } from 'lucide-react';
+import { ArrowRight, BadgeDollarSign, Camera, Check, ChevronLeft, ChevronRight, MapPin, Phone, X } from 'lucide-react';
 import { COMPANY } from '@/lib/content';
+import type { Truck } from '@/lib/trucks';
+import Select from './Select';
 
-export interface Truck {
-  id: string;
-  model: string;
-  year: number;
-  location: string;
-  mileage: number;
-  engine: string;
-  transmission: string;
-  photos: string[];
-}
-
-const fmtMiles = (n: number) => `${n.toLocaleString('en-US')} mi`;
+const title = (t: Truck) => `${t.year} ${t.model}`;
 
 export default function Catalog({ trucks }: { trucks: Truck[] }) {
   const [model, setModel] = useState('');
@@ -28,7 +19,7 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
   const lastFocus = useRef<HTMLElement | null>(null);
 
   const models = useMemo(() => [...new Set(trucks.map((t) => t.model))].sort(), [trucks]);
-  const locations = useMemo(() => [...new Set(trucks.map((t) => t.location))].sort(), [trucks]);
+  const locations = useMemo(() => [...new Map(trucks.map((t) => [t.location, t.locationName])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [trucks]);
   const list = trucks.filter((t) => (!model || t.model === model) && (!loc || t.location === loc));
   const current = trucks.find((t) => t.id === openId) || null;
 
@@ -97,24 +88,13 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
   return (
     <>
       <div className="filter-bar glass card-dark" data-reveal>
-        <label className="select">
-          <span className="sr-only">Model</span>
-          <select value={model} onChange={(e) => setModel(e.target.value)}>
-            <option value="">All Models</option>
-            {models.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
-        </label>
-        <label className="select">
-          <span className="sr-only">Location</span>
-          <select value={loc} onChange={(e) => setLoc(e.target.value)}>
-            <option value="">All Locations</option>
-            {locations.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
-        </label>
+        <Select label="Model" value={model} onChange={setModel} options={[{ value: '', label: 'All Models' }, ...models.map((m) => ({ value: m, label: m }))]} />
+        <Select
+          label="Location"
+          value={loc}
+          onChange={setLoc}
+          options={[{ value: '', label: 'All Locations' }, ...locations.map(([code, name]) => ({ value: code, label: name }))]}
+        />
         <p className="total mono" aria-live="polite">
           Total trucks: <strong>{list.length}</strong>
         </p>
@@ -126,21 +106,22 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
             <li key={t.id} data-reveal style={{ ['--d' as string]: `${(i % 3) * 0.07}s` }}>
               <button type="button" className="truck-card glass card-dark" onClick={() => open(t.id)} aria-haspopup="dialog">
                 <span className="truck-photo">
-                  <Image src={t.photos[0]} alt="" width={640} height={640} priority={i < 2} sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px" />
+                  <Image src={t.photos[0]} alt={`${title(t)} truck`} width={640} height={480} priority={i < 2} sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px" />
+                  <span className={`status-badge mono${/avail/i.test(t.status) ? '' : ' is-off'}`}>{t.status}</span>
                   <span className="photo-count mono">
                     <Camera size={13} aria-hidden="true" /> {t.photos.length}
                   </span>
                 </span>
                 <span className="truck-body">
-                  <span className="truck-model">{t.model}</span>
+                  <span className="truck-model">{title(t)}</span>
                   <span className="truck-meta mono">
-                    <span>{t.year}</span>
                     <span>
-                      <MapPin size={13} aria-hidden="true" /> {t.location}
+                      <MapPin size={13} aria-hidden="true" /> {t.locationName}
                     </span>
-                    <span>
-                      <Gauge size={13} aria-hidden="true" /> {fmtMiles(t.mileage)}
-                    </span>
+                    <span>{t.condition}</span>
+                  </span>
+                  <span className="truck-pay">
+                    <BadgeDollarSign size={16} aria-hidden="true" /> {t.pay}
                   </span>
                 </span>
               </button>
@@ -179,7 +160,7 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
               }}
             >
               <div className="gallery-main">
-                <Image key={current.photos[photo]} src={current.photos[photo]} alt={`${current.model} — photo ${photo + 1} of ${current.photos.length}`} fill priority sizes="(max-width: 900px) 100vw, 720px" />
+                <Image key={current.photos[photo]} src={current.photos[photo]} alt={`${title(current)} — photo ${photo + 1} of ${current.photos.length}`} fill priority sizes="(max-width: 900px) 100vw, 720px" />
                 {current.photos.length > 1 && (
                   <>
                     <button type="button" className="icon-btn gal-prev" onClick={() => step(-1)} aria-label="Previous photo">
@@ -197,7 +178,7 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
               <div className="gallery-thumbs">
                 {current.photos.map((p, i) => (
                   <button type="button" key={p + i} className={i === photo ? 'is-on' : ''} onClick={() => setPhoto(i)} aria-label={`Show photo ${i + 1}`} aria-pressed={i === photo}>
-                    <Image src={p} alt="" width={96} height={96} />
+                    <Image src={p} alt="" width={96} height={96} loading="eager" />
                   </button>
                 ))}
               </div>
@@ -205,17 +186,30 @@ export default function Catalog({ trucks }: { trucks: Truck[] }) {
             <div className="truck-specs">
               <p className="kicker">Truck details</p>
               <h2 id="truck-modal-title" className="h3">
-                {current.model}
+                {title(current)}
               </h2>
               <dl>
-                <div><dt>Year</dt><dd>{current.year}</dd></div>
-                <div><dt>Mileage</dt><dd>{fmtMiles(current.mileage)}</dd></div>
-                <div><dt>Engine</dt><dd>{current.engine}</dd></div>
-                <div><dt>Transmission</dt><dd>{current.transmission}</dd></div>
-                <div><dt>Location</dt><dd>{current.location}</dd></div>
+                <div><dt>Truck Year</dt><dd>{current.year}</dd></div>
+                <div><dt>Model</dt><dd>{current.model}</dd></div>
+                <div><dt>Condition</dt><dd>{current.condition}</dd></div>
+                <div><dt>Pay</dt><dd>{current.pay}</dd></div>
+                <div><dt>Location</dt><dd>{current.locationName} ({current.location})</dd></div>
+                <div><dt>Status</dt><dd>{current.status}</dd></div>
               </dl>
+              {current.features.length > 0 && (
+                <div>
+                  <p className="kicker">Additional info</p>
+                  <ul className="feature-chips">
+                    {current.features.map((f) => (
+                      <li key={f}>
+                        <Check size={14} aria-hidden="true" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="btn-col">
-                <Link href={`/apply-now?truck=${encodeURIComponent(current.id)}`} className="btn btn-primary btn-block" onClick={close}>
+                <Link href={`/apply-now?truck=${encodeURIComponent(`${title(current)} — ${current.location} (#${current.id})`)}`} className="btn btn-primary btn-block" onClick={close}>
                   <span>Apply for this truck</span>
                   <ArrowRight size={18} aria-hidden="true" />
                 </Link>

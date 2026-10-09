@@ -95,13 +95,14 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
     );
   }
 
-  const field = (key: 'name' | 'first' | 'last' | 'email', label: string, type: string, auto: string) => (
+  const field = (key: 'name' | 'first' | 'last' | 'email', label: string, type: string, auto: string, placeholder: string) => (
     <div className={`field${errors[key] ? ' has-error' : ''}`}>
       <label htmlFor={`${id}-${key}`}>{label}</label>
       <input
         id={`${id}-${key}`}
         type={type}
         autoComplete={auto}
+        placeholder={placeholder}
         value={v[key]}
         onChange={(e) => set(key, e.target.value)}
         aria-invalid={!!errors[key]}
@@ -131,11 +132,11 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
       <div className={split ? 'field-row' : ''}>
         {split ? (
           <>
-            {field('first', 'First name', 'text', 'given-name')}
-            {field('last', 'Last name', 'text', 'family-name')}
+            {field('first', 'First name', 'text', 'given-name', 'John')}
+            {field('last', 'Last name', 'text', 'family-name', 'Smith')}
           </>
         ) : (
-          field('name', 'Full name', 'text', 'name')
+          field('name', 'Full name', 'text', 'name', 'John Smith')
         )}
       </div>
       <div className={`field${errors.phone ? ' has-error' : ''}`}>
@@ -145,7 +146,7 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          placeholder="(555) 555-5555"
+          placeholder="(555) 123-4567"
           value={v.phone}
           onChange={(e) => set('phone', formatPhone(e.target.value))}
           aria-invalid={!!errors.phone}
@@ -157,7 +158,7 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
           </p>
         )}
       </div>
-      {field('email', 'Email', 'email', 'email')}
+      {field('email', 'Email', 'email', 'email', 'john@example.com')}
 
       {variant === 'apply' && (
         <fieldset className={`field segmented-field${errors.truck ? ' has-error' : ''}`}>
@@ -182,7 +183,7 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
       <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hp" value={v.company} onChange={(e) => set('company', e.target.value)} aria-hidden="true" />
 
       <label className="consent">
-        <input type="checkbox" checked={v.sms} onChange={(e) => set('sms', e.target.checked)} />
+        <input type="checkbox" id={`${id}-sms`} checked={v.sms} onChange={(e) => set('sms', e.target.checked)} />
         <span className="consent-box" aria-hidden="true">
           <Check size={14} strokeWidth={3} />
         </span>
@@ -195,11 +196,17 @@ export default function LeadForm({ variant, estimate, className = '' }: Props) {
         </p>
       )}
 
-      <button type="submit" className="btn btn-primary btn-block" disabled={state === 'sending'}>
+      {/* submitting requires the consent box to be ticked */}
+      <button type="submit" className="btn btn-primary btn-block" disabled={state === 'sending' || !v.sms} aria-describedby={v.sms ? undefined : `${id}-sms-hint`}>
         {state === 'sending' ? <Loader2 size={18} className="spin" aria-hidden="true" /> : null}
         <span>{state === 'sending' ? 'Sending…' : 'Submit'}</span>
         {state !== 'sending' && <ArrowRight size={18} strokeWidth={2.2} aria-hidden="true" />}
       </button>
+      {!v.sms && (
+        <p className="consent-hint" id={`${id}-sms-hint`}>
+          Tick the box above to enable Submit.
+        </p>
+      )}
       <p className="privacy-link">
         <Link href="/privacy-policy">Privacy Policy</Link>
       </p>

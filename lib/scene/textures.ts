@@ -23,26 +23,22 @@ export function glowTexture(size = 128) {
   return t;
 }
 
-let logoImg: Promise<HTMLImageElement | null> | null = null;
-export function loadLogo(): Promise<HTMLImageElement | null> {
-  if (!logoImg) {
-    logoImg = new Promise((res) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = () => res(null);
-      img.src = '/img/logo-white.png';
-    });
+const logoCache = new Map<string, Promise<HTMLImageElement | null>>();
+/** 'dark' = white wordmark for dark surfaces, 'color' = original navy logo for light surfaces. */
+export function loadLogo(variant: 'dark' | 'color'): Promise<HTMLImageElement | null> {
+  const src = variant === 'dark' ? '/img/logo-on-dark.png?v=2' : '/img/logo-color.png';
+  if (!logoCache.has(src)) {
+    logoCache.set(
+      src,
+      new Promise((res) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = () => res(null);
+        img.src = src;
+      }),
+    );
   }
-  return logoImg;
-}
-
-function tinted(img: HTMLImageElement, color: string) {
-  const [c, g] = canvas(img.width, img.height);
-  g.drawImage(img, 0, 0);
-  g.globalCompositeOperation = 'source-in';
-  g.fillStyle = color;
-  g.fillRect(0, 0, c.width, c.height);
-  return c;
+  return logoCache.get(src)!;
 }
 
 /** 20ft shipping container side: corrugated ribs + logo. */
@@ -73,7 +69,7 @@ export function containerTexture(aniso: number) {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = aniso;
-  loadLogo().then((img) => {
+  loadLogo('dark').then((img) => {
     if (!img) return;
     const w = 640, h = (w * img.height) / img.width;
     g.globalAlpha = 0.95;
@@ -100,11 +96,10 @@ export function trailerTexture(aniso: number) {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = aniso;
-  loadLogo().then((img) => {
+  loadLogo('color').then((img) => {
     if (!img) return;
-    const blue = tinted(img, '#14467f');
     const w = 1300, h = (w * img.height) / img.width;
-    g.drawImage(blue, 1024 - w / 2, 220 - h / 2, w, h);
+    g.drawImage(img, 1024 - w / 2, 220 - h / 2, w, h);
     tex.needsUpdate = true;
   });
   return tex;

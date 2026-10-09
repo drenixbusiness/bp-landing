@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { sceneStore, type PageSceneConfig } from '@/lib/sceneStore';
+import { SITE_CHAPTERS, sceneStore } from '@/lib/sceneStore';
 
-export default function SceneConfig(props: PageSceneConfig) {
-  const key = JSON.stringify(props);
+/** Pages only choose an optional readability veil; the camera path is the same site-wide. */
+export default function SceneConfig({ veil = 0 }: { veil?: number }) {
+  const key = JSON.stringify({ chapters: SITE_CHAPTERS, veil });
   useEffect(() => {
     sceneStore.set(JSON.parse(key));
   }, [key]);

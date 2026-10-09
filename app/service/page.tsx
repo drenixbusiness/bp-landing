@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <>
-      <SceneConfig chapters={[2.5, 1.5, 3.5, 4.5, 6.5]} />
+      <SceneConfig />
       <section className="page-hero" aria-labelledby="svc-h1">
         <div className="container">
           <Kicker>What we do</Kicker>

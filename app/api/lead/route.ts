@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendLeadToTelegram, telegramConfigured } from '@/lib/telegram';
 import { phoneDigits, validEmail, validName, validPhone } from '@/lib/validate';
 
 const FORMS = new Set(['partner', 'apply', 'owner']);
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     semiTruck: str('semiTruck') || undefined,
     smsConsent: body.smsConsent === true,
     truckId: str('truckId').slice(0, 60) || undefined,
-    estimate: typeof body.estimate === 'object' && body.estimate ? body.estimate : undefined,
+    estimate: typeof body.estimate === 'object' && body.estimate ? (body.estimate as Record<string, unknown>) : undefined,
     receivedAt: new Date().toISOString(),
   };
   const errors: string[] = [];
@@ -44,16 +45,20 @@ export async function POST(req: Request) {
 
   const payload = { ...lead, phone: `+1${phoneDigits(lead.phone)}` };
   const hook = process.env.LEAD_WEBHOOK_URL;
-  if (hook) {
-    try {
-      const r = await fetch(hook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!r.ok) throw new Error(String(r.status));
-    } catch (e) {
-      console.error('[lead] webhook failed', e);
-      return NextResponse.json({ ok: false, error: 'delivery' }, { status: 502 });
-    }
-  } else {
+  if (!telegramConfigured() && !hook) {
     console.info('[lead]', JSON.stringify(payload));
+    return NextResponse.json({ ok: true });
   }
+  // deliver to the Telegram group (and/or an optional webhook); succeed if at least one got it
+  const results = await Promise.allSettled([
+    telegramConfigured() ? sendLeadToTelegram(payload) : Promise.reject(new Error('skip')),
+    hook
+      ? fetch(hook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then((r) => {
+          if (!r.ok) throw new Error(`webhook ${r.status}`);
+        })
+      : Promise.reject(new Error('skip')),
+  ]);
+  results.forEach((r) => r.status === 'rejected' && (r.reason as Error).message !== 'skip' && console.error('[lead] delivery failed:', (r.reason as Error).message));
+  if (!results.some((r) => r.status === 'fulfilled')) return NextResponse.json({ ok: false, error: 'delivery' }, { status: 502 });
   return NextResponse.json({ ok: true });
 }

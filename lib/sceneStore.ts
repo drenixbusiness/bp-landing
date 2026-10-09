@@ -1,4 +1,7 @@
 /** Page → scene configuration. Mutated by <SceneConfig>, read by <SceneHost> every scroll tick. */
+/** The single camera path every page uses: scroll progress 0 → 1 walks through all chapters. */
+export const SITE_CHAPTERS = [0, 1, 2, 3, 4, 5, 6.5];
+
 export interface PageSceneConfig {
   /** Chapter values the page walks through as scroll progress goes 0 → 1 (piecewise linear). */
   chapters: number[];
@@ -10,7 +13,7 @@ export interface PageSceneConfig {
 
 type Listener = (c: PageSceneConfig) => void;
 
-let config: PageSceneConfig = { chapters: [0.5, 6.5] };
+let config: PageSceneConfig = { chapters: SITE_CHAPTERS };
 const listeners = new Set<Listener>();
 
 export const sceneStore = {

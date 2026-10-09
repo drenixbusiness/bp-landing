@@ -2,21 +2,29 @@
 
 export const COMPANY = {
   name: 'BIPOLARBEAR ENTERPRISES LLC',
+  legalName: 'Bipolar Bear Enterprises LLC',
+  mc: '1031523',
+  dot: '3268702',
+  operationsEmail: 'operations@bipolar-bear.com',
+  privacyPhone: '+1 (330) 838-6510',
+  privacyPhoneHref: 'tel:+13308386510',
   ids: 'MC# 1031523 • US DOT# 3268702',
   phone: '+1 (601) 427 1757',
   phoneHref: 'tel:+16014271757',
   email: 'info@bipolar-bear.com',
   instagram: 'https://www.instagram.com/bipolarbear_enterprises',
   facebook: 'https://www.facebook.com/BipolarbearEnterprisesLLC',
+  /** the one office */
+  address: { place: 'Breckenridge Park', street: '118 Breckenridge Dr APT 202', city: 'Hattiesburg, MS 39402', country: 'United States', lat: 31.35397, lon: -89.356 },
+  mapsUrl: 'https://www.google.com/maps/search/?api=1&query=118+Breckenridge+Dr+APT+202%2C+Hattiesburg%2C+MS+39402',
 };
 
 export const SMS_CONSENT =
   'By checking this box you agree to receive text messages from Bipolar Bear Enterprises LLC, you can reply stop to opt-out any time, this is my privacy policy https://bipolar-bear.com/privacy-policy';
 
 export const NAV = [
-  { label: 'About Us', href: '/#about' },
+  { label: 'About Us', href: '/about' },
   { label: 'Services', href: '/service' },
-  { label: 'Our Partners', href: '/#partners' },
   { label: 'Owner-Operators', href: '/owner-operators' },
   { label: 'Catalog', href: '/catalog' },
   { label: 'Privacy Policy', href: '/privacy-policy' },
@@ -29,10 +37,10 @@ export const HERO = {
 
 export const WHY = {
   intro:
-    'With over 300 broker partnerships across the U.S., 50+ experienced drivers and owner-operators, and 20,000 deliveries completed in 2023 alone, Bipolar Bear Enterprises Inc. stands as a trusted leader in logistics. Our dedicated team of professionals ensures efficient, reliable, and on-time services to meet all your freight needs.',
+    'With over 300 broker partnerships across the U.S., 80+ experienced drivers and owner-operators, and 20,000 deliveries completed in 2023 alone, Bipolar Bear Enterprises Inc. stands as a trusted leader in logistics. Our dedicated team of professionals ensures efficient, reliable, and on-time services to meet all your freight needs.',
   cards: [
     { num: '300+', title: 'partnered brokers in all states', text: 'We work with over 300 brokers across the U.S., ensuring efficient and reliable freight solutions nationwide.' },
-    { num: '50+', title: 'drivers and owner operators', text: 'Our team includes more than 50 experienced drivers and owner-operators, guaranteeing timely and professional deliveries.' },
+    { num: '80+', title: 'drivers and owner operators', text: 'Our team includes more than 80 experienced drivers and owner-operators, guaranteeing timely and professional deliveries.' },
     { num: '20,000', title: 'total loads delivered in 2023', text: 'We have successfully completed over 20,000 deliveries in 2023 alone.' },
     { num: '35', title: 'professional and educated employees', text: 'Our company is supported by 35 highly skilled and well-trained employees.' },
     { num: '3', title: 'years in operation with PO/VAN', text: 'We have been operating successfully with PO/VAN services for over three years.' },
@@ -126,16 +134,16 @@ export const FAQ = [
 ];
 
 export const ABOUT = {
-  p1: 'Welcome to Bipolar Bear, a leading car-hauling and transportation company with one of the largest networks in the Southeastern United States. With three branches located in Florida and Ohio, we are strategically positioned to serve our clients efficiently.',
+  p1: 'Welcome to Bipolar Bear, a leading car-hauling and transportation company with one of the largest networks in the Southeastern United States. Based in Hattiesburg, Mississippi, we are strategically positioned to serve our clients efficiently.',
   p2: 'With more than five years of experience in vehicle hauling, we’ve become industry leaders in transportation solutions. Our team of 45 skilled professionals provides excellent service to ensure efficient and on-time delivery.',
 };
 
 export const PARTNERS = [
-  { name: 'Amazon', src: '/img/partner-1.webp' },
-  { name: 'FedEx', src: '/img/partner-2.webp' },
-  { name: 'PAM Transport', src: '/img/partner-3.webp' },
-  { name: 'Werner Enterprises', src: '/img/partner-4.webp' },
-  { name: 'UPS', src: '/img/partner-5.webp' },
+  { name: 'Amazon', src: '/img/partner-1-mono.webp' },
+  { name: 'FedEx', src: '/img/partner-2-mono.webp' },
+  { name: 'PAM Transport', src: '/img/partner-3-mono.webp' },
+  { name: 'Werner Enterprises', src: '/img/partner-4-mono.webp' },
+  { name: 'UPS', src: '/img/partner-5-mono.webp' },
 ];
 
 export const PARTNER_CTA = {

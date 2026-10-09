@@ -65,6 +65,12 @@ export function iceMaterial(physical: boolean) {
   return physical ? new THREE.MeshPhysicalMaterial({ ...base, clearcoat: 1, clearcoatRoughness: 0.18 }) : new THREE.MeshStandardMaterial(base);
 }
 
+/** Slab-local positions shared with the bear's walker (keep in sync with the meshes below). */
+export const SLAB_LAYOUT = {
+  container: { x: -2.2, z: -1.2, rot: -0.18 },
+  pole: { x: 7.4, z: -2.4 },
+};
+
 export function createIce(physical: boolean, floeCount: number, aniso: number) {
   const group = new THREE.Group();
   const mat = iceMaterial(physical);
@@ -94,7 +100,8 @@ export function createIce(physical: boolean, floeCount: number, aniso: number) {
     do {
       x = (Math.random() - 0.5) * 260;
       z = -40 + Math.random() * 110 - (Math.random() < 0.35 ? 60 : 0);
-    } while (Math.hypot(x - 17, z + 12) < 15 || (z < -42 && z > -62));
+      // floes drift along x, so keep whole z-bands clear of the slab and the ice shelf
+    } while (Math.abs(z + 12) < 11 || (z < -38 && z > -66));
     floeData.push({ x, z, s: 0.6 + Math.random() * Math.random() * 3.2, r: Math.random() * 6.28, ph: Math.random() * 6.28, vx: (Math.random() - 0.5) * 0.25 });
   }
   floes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -135,8 +142,8 @@ export function createIce(physical: boolean, floeCount: number, aniso: number) {
   const plain = new THREE.MeshStandardMaterial({ color: '#174a86', roughness: 0.6, metalness: 0.3 });
   const cgeo = new THREE.BoxGeometry(6.06, 2.59, 2.44);
   const container = new THREE.Mesh(cgeo, [plain, plain, plain, plain, side, side]);
-  container.position.set(-2.2, 1.36 + 1.3, -1.2);
-  container.rotation.y = -0.18;
+  container.position.set(SLAB_LAYOUT.container.x, 1.36 + 1.3, SLAB_LAYOUT.container.z);
+  container.rotation.y = SLAB_LAYOUT.container.rot;
   slab.add(container);
   const capGeo = bergGeometry({ radius: 1, detail: 2, seed: 44, scale: [3.1, 0.18, 1.3], rough: 0.12 });
   const cap = new THREE.Mesh(capGeo, snowMat);
@@ -148,7 +155,7 @@ export function createIce(physical: boolean, floeCount: number, aniso: number) {
   const poleMat = new THREE.MeshStandardMaterial({ color: '#2a3442', roughness: 0.5, metalness: 0.6 });
   const poleGeo = new THREE.CylinderGeometry(0.06, 0.08, 4.2, 8);
   const pole = new THREE.Mesh(poleGeo, poleMat);
-  pole.position.set(7.4, 1.36 + 2.1, -2.4);
+  pole.position.set(SLAB_LAYOUT.pole.x, 1.36 + 2.1, SLAB_LAYOUT.pole.z);
   slab.add(pole);
   const lampMat = new THREE.MeshStandardMaterial({ color: '#ff8a2a', emissive: '#ff7a1a', emissiveIntensity: 2 });
   const lampGeo = new THREE.SphereGeometry(0.18, 12, 8);

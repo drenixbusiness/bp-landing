@@ -6,6 +6,8 @@ import { createIce } from './ice';
 import { createHighway, LANES, normaliseTractor, ROAD_Y, type TractorModel } from './truck';
 import { gltfLoader, tameMaterials } from './gltf';
 import { createProceduralBear, loadGLBBear, type Bear } from './bear';
+import { createWalker } from './walker';
+import { SLAB_LAYOUT } from './ice';
 import { createSnow } from './snow';
 import { glowTexture, snowAtlas } from './textures';
 import { detectTier, qualityFor, type Tier } from './quality';
@@ -42,13 +44,18 @@ export interface PolarScene {
   readonly tier: Tier;
   /** Draw stats for QA (triangles, calls, memory). */
   info(): Record<string, number>;
+  key0(k: Record<string, number>): void;
+  /** QA: run the simulation forward without waiting for frames */
+  advance(sec: number): void;
 }
 
+// bump when a model file changes: /assets is cached by browsers for 30 days
+const ASSET_VERSION = '3';
 const DEFAULT_ASSETS = {
-  bear: '/assets/polar-bear.glb',
-  bearLo: '/assets/polar-bear-lo.glb',
-  truck: '/assets/truck-cascadia.glb',
-  truckLo: '/assets/truck-cascadia-lo.glb',
+  bear: `/assets/polar-bear.glb?v=${ASSET_VERSION}`,
+  bearLo: `/assets/polar-bear-lo.glb?v=${ASSET_VERSION}`,
+  truck: `/assets/truck-cascadia.glb?v=${ASSET_VERSION}`,
+  truckLo: `/assets/truck-cascadia-lo.glb?v=${ASSET_VERSION}`,
 };
 // model-specific orientation fixes
 const TRUCK_FRONT_POSITIVE = true;
@@ -57,10 +64,11 @@ const BEAR_FACING = 0;
 type Key = { tx: number; ty: number; tz: number; az: number; el: number; dist: number; fo: number };
 const quintic = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
 
+export const debugKey0: Partial<Key> = {};
 function chapterKeys(heroX: number, bear: THREE.Vector3): Key[] {
   const lz = LANES[0];
   return [
-    { tx: 0, ty: 7, tz: -40, az: 0.05, el: 0.06, dist: 62, fo: 0 }, // 0 hero wide
+    { tx: 22, ty: 0, tz: -40, az: 0.1, el: 0.24, dist: 70, fo: 0, ...debugKey0 }, // 0 hero wide (high, horizon near the top)
     { tx: heroX - 2.4, ty: ROAD_Y + 1.9, tz: lz, az: 0.82, el: 0.1, dist: 11.5, fo: -0.16 }, // 1 cab close-up
     { tx: heroX - 11, ty: ROAD_Y + 1.6, tz: lz, az: 0.1, el: 0.07, dist: 33, fo: -0.1 }, // 2 full rig side
     { tx: heroX - 10, ty: ROAD_Y + 1, tz: lz, az: -0.55, el: 0.6, dist: 46, fo: 0 }, // 3 high rig
@@ -129,20 +137,10 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
   const refl = createReflectionRT(Q.reflectSize[0], Q.reflectSize[1], sky.uniforms);
   mark('build-1');
   await yieldMain();
-  const stars = createStars(Q.stars, Math.min(deviceDpr, Q.maxDpr));
+  const stars = createStars(Q.starMag, Math.min(deviceDpr, Q.maxDpr));
   scene.add(stars.points);
   const polaris = createPolarisMarker(glow);
   scene.add(polaris.group);
-  document.fonts?.ready.then(() => {
-    const c = polaris.labelTex.image as HTMLCanvasElement;
-    const g = c.getContext('2d')!;
-    g.clearRect(0, 0, c.width, c.height);
-    g.font = '500 26px "JetBrains Mono", ui-monospace, monospace';
-    g.fillStyle = 'rgba(234,246,255,.82)';
-    g.textBaseline = 'middle';
-    g.fillText('POLARIS  α UMi', 8, 32);
-    polaris.labelTex.needsUpdate = true;
-  });
 
   mark('build-2');
   await yieldMain();
@@ -174,7 +172,20 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
   const traffic = createHighway(Q.physical, aniso, glow, Q.trucks);
   scene.add(traffic.group);
 
-  let bear: Bear = createProceduralBear();
+  // the bear wanders the slab, steering around the container and the beacon
+  const walker = createWalker({
+    cx: 0.2,
+    cz: 0,
+    rx: 7.6,
+    rz: 4.7,
+    clearance: 0.55,
+    halfLength: 1.05,
+    obstacles: [
+      { kind: 'rect', x: SLAB_LAYOUT.container.x, z: SLAB_LAYOUT.container.z, hx: 3.03, hz: 1.22, rot: SLAB_LAYOUT.container.rot },
+      { kind: 'circle', x: SLAB_LAYOUT.pole.x, z: SLAB_LAYOUT.pole.z, hx: 0.12 },
+    ],
+  }, { x: 3.2, z: 2.6, heading: -1.4 });
+  let bear: Bear = createProceduralBear(walker.state);
   ice.slab.add(bear.object);
 
   mark('build-5');
@@ -309,8 +320,13 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
     stars.uniforms.uVis.value = 1 - cur.day;
     tmpV.copy(POLARIS_EQ).applyMatrix4(skyM).multiplyScalar(950).add(camera.position);
     polaris.group.position.copy(tmpV);
-    polaris.sprite.material.opacity = 0.55 * (1 - cur.day);
-    polaris.label.material.opacity = 0.9 * (1 - cur.day);
+    // Polaris breathes slowly so it reads as the guiding star
+    const night = 1 - cur.day;
+    const breathe = 0.85 + 0.15 * Math.sin(t * 0.9);
+    polaris.sprite.material.opacity = 0.7 * night * breathe;
+    polaris.core.material.opacity = night;
+    polaris.rays.material.opacity = 0.75 * night * breathe;
+    polaris.rays.material.rotation = Math.sin(t * 0.05) * 0.06;
     ocean.mesh.position.set(Math.round(camera.position.x / 50) * 50, 0, Math.round(camera.position.z / 50) * 50);
     ocean.uniforms.uTime.value = t;
     ocean.uniforms.uDay.value = cur.day;
@@ -329,6 +345,7 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
     const blink = ice.update(t);
     (beaconGlow.material as THREE.SpriteMaterial).opacity = 0.25 + blink * 0.9;
     traffic.update(t, dt, cur.heroX);
+    walker.update(dt);
     bear.update(t, dt);
 
     const scale = (viewH * renderer.getPixelRatio()) / (2 * Math.tan((camera.fov * Math.PI) / 360));
@@ -422,27 +439,34 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
       return null;
     }
   };
+  // While the real models stream in, nothing placeholder-ish is shown: the trucks and the bear
+  // appear together once loaded. Procedural stand-ins are only revealed if loading fails/is skipped.
+  const willLoad = !!A && !saveData;
+  traffic.group.visible = !willLoad;
+  bear.object.visible = !willLoad;
   const loadModels = async () => {
     if (!A || saveData) return;
     mark('pre-models');
-    const truck = await loadTractor(lite ? A.truckLo : A.truck);
-    mark('truck');
-    if (disposed) return;
-    if (truck) traffic.useModel(truck, lite ? 'all' : 'hero');
-    const b = await loadGLBBear(lite ? A.bearLo : A.bear, { facing: BEAR_FACING, envIntensity: 1.2, startPhase: bear.phase });
-    mark('bear');
+    const [truck, trafficTruck, b] = await Promise.all([
+      loadTractor(lite ? A.truckLo : A.truck),
+      lite ? Promise.resolve(null) : loadTractor(A.truckLo),
+      loadGLBBear(lite ? A.bearLo : A.bear, walker.state, { facing: BEAR_FACING, envIntensity: 1.2 }),
+    ]);
+    mark('models');
     if (disposed) return b?.dispose();
+    if (truck) traffic.useModel(truck, lite ? 'all' : 'hero');
+    if (trafficTruck) traffic.useModel(trafficTruck, 'traffic');
+    else if (truck && !lite) traffic.useModel(truck, 'traffic');
     if (b) {
       await compileThen(b.object);
+      if (disposed) return b.dispose();
       ice.slab.remove(bear.object);
       bear.dispose();
       bear = b;
       ice.slab.add(b.object);
     }
-    if (!lite && truck) {
-      const lo = await loadTractor(A.truckLo);
-      if (lo && !disposed) traffic.useModel(lo, 'traffic');
-    }
+    traffic.group.visible = true;
+    bear.object.visible = true;
     if (reduce) renderOnce();
   };
 
@@ -479,7 +503,13 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
     if (disposed) return;
     mark('compile');
     // models stream in once the scene is already on screen
-    setTimeout(() => !disposed && loadModels(), reduce ? 0 : 600);
+    setTimeout(() => {
+      if (disposed) return;
+      loadModels().catch(() => {
+        traffic.group.visible = true;
+        bear.object.visible = true;
+      });
+    }, reduce ? 0 : 300);
     if (reduce) {
       first = true;
       renderOnce();
@@ -492,7 +522,19 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
 
   return {
     tier,
-    info: () => ({ ...renderer.info.render, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, dpr: renderer.getPixelRatio() }),
+    advance: (sec: number) => {
+      for (let i = 0; i < sec * 60; i++) {
+        t += 1 / 60;
+        update(1 / 60);
+      }
+      refl.render(renderer);
+      renderer.render(scene, camera);
+    },
+    key0: (k: Partial<Key>) => {
+      Object.assign(debugKey0, k);
+      snap = true;
+    },
+    info: () => ({ ...traffic.hazardDebug(), ...(bear.debug?.() ?? { type: 'procedural', speed: walker.state.speed }), ...renderer.info.render, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, dpr: renderer.getPixelRatio() }),
     set(p) {
       if ((p as { snap?: boolean }).snap || reduce) snap = true;
       Object.assign(S, p);
@@ -514,9 +556,10 @@ export async function mountPolarScene(canvas: HTMLCanvasElement, opts: MountOpti
       (sky.mesh.material as THREE.Material).dispose();
       stars.points.geometry.dispose();
       (stars.points.material as THREE.Material).dispose();
-      polaris.labelTex.dispose();
       polaris.sprite.material.dispose();
-      polaris.label.material.dispose();
+      polaris.core.material.dispose();
+      polaris.rays.material.dispose();
+      polaris.raysTex.dispose();
       ocean.mesh.geometry.dispose();
       (ocean.mesh.material as THREE.Material).dispose();
       (beaconGlow.material as THREE.Material).dispose();

@@ -1,7 +1,34 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "bp-prod", "runtimeExecutable": "npm", "runtimeArgs": ["run", "start", "--", "-p", "3100"], "port": 3100 },
-    { "name": "bp-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--", "-p", "3101"], "port": 3101 }
+    {
+      "name": "bp-3033",
+      "url": "http://localhost:3033",
+      "port": 3033
+    },
+    {
+      "name": "bp-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start",
+        "--",
+        "-p",
+        "3100"
+      ],
+      "port": 3100
+    },
+    {
+      "name": "bp-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3101"
+      ],
+      "port": 3101
+    }
   ]
 }

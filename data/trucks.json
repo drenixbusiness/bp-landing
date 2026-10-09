@@ -1,0 +1,42 @@
+[
+  {
+    "id": "pb-579-2021",
+    "model": "Peterbilt 579",
+    "year": 2021,
+    "location": "Jackson, MS",
+    "mileage": 412000,
+    "engine": "PACCAR MX-13, 455 hp",
+    "transmission": "Eaton Fuller 10-speed manual",
+    "photos": ["/img/svc-dispatch.webp", "/img/svc-insurance.webp"]
+  },
+  {
+    "id": "fl-cascadia-2022",
+    "model": "Freightliner Cascadia",
+    "year": 2022,
+    "location": "Columbus, OH",
+    "mileage": 298500,
+    "engine": "Detroit DD15, 505 hp",
+    "transmission": "Detroit DT12 automated",
+    "photos": ["/img/svc-insurance.webp", "/img/svc-fuel.webp", "/img/about-2.webp"]
+  },
+  {
+    "id": "fl-cascadia-2020",
+    "model": "Freightliner Cascadia",
+    "year": 2020,
+    "location": "Jacksonville, FL",
+    "mileage": 486200,
+    "engine": "Detroit DD15, 455 hp",
+    "transmission": "Detroit DT12 automated",
+    "photos": ["/img/svc-fuel.webp", "/img/svc-insurance.webp"]
+  },
+  {
+    "id": "pb-389-2019",
+    "model": "Peterbilt 389",
+    "year": 2019,
+    "location": "Jackson, MS",
+    "mileage": 538900,
+    "engine": "Cummins X15, 565 hp",
+    "transmission": "Eaton Fuller 13-speed manual",
+    "photos": ["/img/svc-dispatch.webp", "/img/about-2.webp"]
+  }
+]

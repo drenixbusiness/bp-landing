@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Bipolar Bear Enterprises LLC',
     short_name: 'Bipolar Bear',
-    description: 'Nationwide freight solutions — dispatch, logbook, billing & factoring, fuel and insurance.',
+    description: 'Nationwide freight solutions — dispatch, HR & driver support, billing & factoring, fuel and insurance.',
     start_url: '/',
     display: 'standalone',
     background_color: '#020814',

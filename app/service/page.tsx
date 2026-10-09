@@ -7,7 +7,7 @@ import { COMPANY, PARTNER_CTA, SERVICES } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Services',
-  description: 'Dispatch, Safety Legal Logbook, Accounting, Billing & factoring, Fuel and Insurance services for owner-operators.',
+  description: 'Dispatch, HR & Driver Support, Accounting, Billing & factoring, Fuel and Insurance services for owner-operators.',
 };
 
 export default function ServicesPage() {

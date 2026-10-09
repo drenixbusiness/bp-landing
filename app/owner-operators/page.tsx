@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { BadgeDollarSign, CalendarCheck, Download, Eye, Handshake, Headset, Route, ShieldCheck, UserRound } from 'lucide-react';
+import { BadgeDollarSign, CalendarCheck, Download, Eye, Handshake, Headset, HeartHandshake, Route, UserRound } from 'lucide-react';
 import SceneConfig from '@/components/SceneConfig';
 import Faq from '@/components/Faq';
 import Calculator from '@/components/owner/Calculator';
@@ -20,12 +20,12 @@ const BENEFITS = [
   { icon: BadgeDollarSign, title: 'No Hidden Fees', text: 'One flat 12% company fee. What you see in the calculator is what you get.' },
   { icon: Handshake, title: 'Partner Network', text: 'Over 300 partnered brokers in all states for steady, high-paying freight.' },
   { icon: Eye, title: 'Transparent Rates', text: 'See the broker rate on every load. No secret margins between you and the freight.' },
-  { icon: ShieldCheck, title: 'Compliance Made Simple', text: 'Safety legal logbook, USDOT requirements and violations handled by our team.' },
+  { icon: HeartHandshake, title: 'HR Always on Your Side', text: 'Our HR team is your bridge to the company — any question or issue, they support you and get it solved.' },
 ];
 
 const OO_FAQ = [
   { q: 'Is dispatch really non-forced?', a: 'Yes. You decide which loads and lanes you run. Your dedicated dispatcher brings you options and negotiates rates — the final call is always yours.' },
-  { q: 'What does the 12% company fee cover?', a: 'Dispatch, safety legal logbook support, accounting, billing and factoring paperwork, and 24/7 support. There are no hidden fees on top.' },
+  { q: 'What does the 12% company fee cover?', a: 'Dispatch, HR & driver support, accounting, billing and factoring paperwork, and 24/7 support. There are no hidden fees on top.' },
   { q: 'How is fuel handled?', a: 'No personal cash purchases at the pump, charge back the fuel spent on your weekly payout with additional custom bonuses.' },
   { q: 'How do I get started?', a: 'Simply reach out to our team, and we will guide you through the onboarding process, consider your personal preferences, and design a service package that best suits your business goals.' },
   { q: 'Is the calculator a guarantee of earnings?', a: 'No. It is an estimate based on the numbers you enter. Real earnings depend on lanes, rates, season, equipment and your own expenses.' },
@@ -80,7 +80,7 @@ export default function OwnerOperatorsPage() {
             {[
               { n: '$9–14K +', l: 'Weekly gross', t: 'Typical gross for an OTR owner-operator running consistent lanes with our dispatch.' },
               { n: '$2.80+', l: 'Per mile', t: 'Rates negotiated across a network of more than 1,000+ brokers.' },
-              { n: '12%', l: 'Company fee', t: 'One flat fee for dispatch, logbook, billing & factoring and support.' },
+              { n: '12%', l: 'Company fee', t: 'One flat fee for dispatch, HR support, billing & factoring.' },
               { n: '3.2–5K', l: 'Miles / week', t: 'Typical OTR range of 3,200–5,000 miles — pick the pace that fits your home time.' },
             ].map((e, i) => (
               <div key={e.l} className="earn-card glass card-dark" data-reveal style={{ ['--d' as string]: `${i * 0.08}s` }}>

@@ -11,7 +11,7 @@ import { ABOUT, ADVANTAGES, COMPANY, PARTNERS, WHY } from '@/lib/content';
 export const metadata: Metadata = {
   title: 'About Us',
   description:
-    'About Bipolar Bear Enterprises LLC — a trucking and transportation company based in Hattiesburg, Mississippi, with 300+ partnered brokers and 24/7 service. MC# 1031523 • US DOT# 3268702.',
+    'About Bipolar Bear Enterprises LLC — a trucking and transportation company based in Hattiesburg, Mississippi, with 300+ partnered brokers and 24/7 service. MC# 1257747 • US DOT# 3650011.',
 };
 
 const WHY_ICONS = [Handshake, Users, PackageCheck, GraduationCap, CalendarClock];
@@ -206,17 +206,7 @@ export default function AboutPage() {
               </a>
               <CopyButton value={COMPANY.operationsEmail} label="operations email" />
             </li>
-            <li className="contact-card glass card-dark" data-reveal style={{ ['--d' as string]: '.18s' }}>
-              <span className="contact-icon">
-                <ShieldCheck size={20} aria-hidden="true" />
-              </span>
-              <p className="kicker">Privacy inquiries</p>
-              <a href={COMPANY.privacyPhoneHref} className="contact-value mono">
-                {COMPANY.privacyPhone}
-              </a>
-              <CopyButton value={COMPANY.privacyPhone} label="privacy phone number" />
-            </li>
-            <li className="contact-card glass card-dark" data-reveal style={{ ['--d' as string]: '.24s' }}>
+            <li className="contact-card contact-wide glass card-dark" data-reveal style={{ ['--d' as string]: '.18s' }}>
               <span className="contact-icon">
                 <MapPin size={20} aria-hidden="true" />
               </span>
@@ -228,7 +218,7 @@ export default function AboutPage() {
                 {COMPANY.address.city}, {COMPANY.address.country}
               </p>
             </li>
-            <li className="contact-card glass card-dark" data-reveal style={{ ['--d' as string]: '.3s' }}>
+            <li className="contact-card glass card-dark" data-reveal style={{ ['--d' as string]: '.24s' }}>
               <span className="contact-icon">
                 <AtSign size={20} aria-hidden="true" />
               </span>

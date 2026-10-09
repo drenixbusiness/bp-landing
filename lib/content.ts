@@ -3,12 +3,10 @@
 export const COMPANY = {
   name: 'BIPOLARBEAR ENTERPRISES LLC',
   legalName: 'Bipolar Bear Enterprises LLC',
-  mc: '1031523',
-  dot: '3268702',
+  mc: '1257747',
+  dot: '3650011',
   operationsEmail: 'operations@bipolar-bear.com',
-  privacyPhone: '+1 (330) 838-6510',
-  privacyPhoneHref: 'tel:+13308386510',
-  ids: 'MC# 1031523 • US DOT# 3268702',
+  ids: 'MC# 1257747 • US DOT# 3650011',
   phone: '+1 (601) 427 1757',
   phoneHref: 'tel:+16014271757',
   email: 'info@bipolar-bear.com',
@@ -31,7 +29,7 @@ export const NAV = [
 ];
 
 export const HERO = {
-  title: 'Setting New Standards in Trucking',
+  title: 'Setting New Partners in Trucking',
   text: 'Leading Trucking Services across the all US. Bipolar Bear Enterprises provides top-tier trucking services to meet all your transportation needs. Whether you`re hauling across the town or across the country, our experienced and reliable team will provide 24/7 service to fulfill all your needs and costs.',
 };
 
@@ -43,7 +41,7 @@ export const WHY = {
     { num: '80+', title: 'drivers and owner operators', text: 'Our team includes more than 80 experienced drivers and owner-operators, guaranteeing timely and professional deliveries.' },
     { num: '20,000', title: 'total loads delivered in 2023', text: 'We have successfully completed over 20,000 deliveries in 2023 alone.' },
     { num: '50', title: 'professional and educated employees', text: 'Our company is supported by 50 highly skilled and well-trained employees.' },
-    { num: '3', title: 'years in operation with PO/VAN', text: 'We have been operating successfully with PO/VAN services for over three years.' },
+    { num: '6', title: 'years in operation with PO/VAN', text: 'We have been operating successfully with PO/VAN services for over six years.' },
   ],
 };
 
@@ -77,12 +75,12 @@ export const SERVICES = [
     photo: '/img/svc-dispatch.webp',
   },
   {
-    id: 'safety',
-    tab: 'Safety Legal Logbook',
-    short: 'Safety Legal Logbook',
-    shortText: 'We prepare you in accordance with USDOT requirements, resolve any issues or violations, ensure compliance with regulations, and provide a secure record of all our operations.',
-    title: 'Safety legal logbook',
-    text: 'Our Safety Legal Logbook service is designed to help you meet the strict rules of the U.S. Department of Transportation for your commercial vehicle operations. We know that keeping accurate and up-to-date logbooks can be tricky, so our dedicated team is here to make it easy for you.',
+    id: 'hr',
+    tab: 'HR & Driver Support',
+    short: 'HR & Driver Support',
+    shortText: 'Our HR team is the bridge between you and the company — always on your side, answering questions, solving problems and keeping you supported on every mile.',
+    title: 'HR & driver support',
+    text: 'Our HR team is the bridge between our drivers and the company. From onboarding and paperwork to pay questions, home time and anything that comes up on the road, your HR contact listens, speaks up for you and makes sure every issue gets solved quickly. You are never on your own — a real person who knows you is always one call away.',
     icon: '/img/ic-safety.webp',
     photo: '/img/svc-safety.webp',
   },

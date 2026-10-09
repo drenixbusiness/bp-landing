@@ -2726,7 +2726,12 @@ section[data-chapter] {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: dense;
   gap: 16px;
+}
+/* the office card spans two columns so 5 cards fill the grid evenly */
+.contact-wide {
+  grid-column: span 2;
 }
 @media (max-width: 1080px) {
   .contact-grid {
@@ -2736,6 +2741,9 @@ section[data-chapter] {
 @media (max-width: 640px) {
   .contact-grid {
     grid-template-columns: 1fr;
+  }
+  .contact-wide {
+    grid-column: auto;
   }
 }
 .contact-card {

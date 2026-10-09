@@ -49,7 +49,7 @@ function para(p, text, x, y, { font = reg, size = 18, color = C.ice, max = 500, 
 }
 function footer(p, n) {
   p.drawImage(logo, { x: 60, y: 30, width: 170, height: 36 });
-  p.drawText('MC# 1031523 • US DOT# 3268702   ·   +1 (601) 427 1757   ·   info@bipolar-bear.com', { x: 240, y: 46, size: 12, font: mono, color: C.muted });
+  p.drawText('MC# 1257747 • US DOT# 3650011   ·   +1 (601) 427 1757   ·   info@bipolar-bear.com', { x: 240, y: 46, size: 12, font: mono, color: C.muted });
   p.drawText(String(n).padStart(2, '0'), { x: W - 90, y: 46, size: 12, font: mono, color: C.mint });
 }
 
@@ -101,7 +101,7 @@ function footer(p, n) {
   p.drawText('Everything handled.', { x: 60, y: 580, size: 48, font: bold, color: C.white });
   const svc = [
     ['Dispatch', 'Unlimited searches of high-priced loads through a network of more than 1,000+ brokers.'],
-    ['Safety Legal Logbook', 'USDOT compliance, violations resolved, secure records.'],
+    ['HR & Driver Support', 'Your bridge to the company: questions and issues solved, always supported.'],
     ['Accounting, billing, & factoring', 'Billing paperwork, W9 tax records and load payoffs on settlement week.'],
     ['Fuel', 'No personal cash at the pump — charged back on your weekly payout with bonuses.'],
     ['Insurance', 'Wholesale-term rates, discounted liability and cargo insurance.'],

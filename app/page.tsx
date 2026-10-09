@@ -30,7 +30,7 @@ export default function Home() {
             <span>{COMPANY.ids}</span>
           </p>
           <h1 id="hero-title" className="h1 hero-title on-scene" data-reveal style={{ ['--d' as string]: '.08s' }}>
-            <span className="hl-line">Setting New</span> <span className="hl-line">Standards in</span>{' '}
+            <span className="hl-line">Setting New</span> <span className="hl-line">Partners in</span>{' '}
             <em className="mint hl-line">Trucking</em>
           </h1>
           <div className="hero-bottom">

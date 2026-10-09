@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://bipolar-bear.com'),
   title: { default: 'Bipolar Bear Enterprises LLC - Nationwide Freight Solutions', template: '%s · Bipolar Bear Enterprises' },
   description:
-    'Leading Trucking Services across the all US. Dispatch, safety legal logbook, accounting & factoring, fuel and insurance for owner-operators. MC# 1031523 • US DOT# 3268702.',
+    'Leading Trucking Services across the all US. Dispatch, HR & driver support, accounting & factoring, fuel and insurance for owner-operators. MC# 1257747 • US DOT# 3650011.',
   openGraph: { type: 'website', siteName: 'Bipolar Bear Enterprises LLC' },
   appleWebApp: { capable: true, title: 'Bipolar Bear', statusBarStyle: 'black-translucent' },
   formatDetection: { telephone: false },

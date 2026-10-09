@@ -133,9 +133,6 @@ export default function PrivacyPage() {
               <li>
                 Email: <a href="mailto:info@bipolar-bear.com">info@bipolar-bear.com</a>
               </li>
-              <li>
-                Phone: <a href="tel:+13308386510">+1 (330) 838-6510</a>
-              </li>
             </ul>
 
             <h2 id="policy-updates">Policy Updates</h2>

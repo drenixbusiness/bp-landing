@@ -42,7 +42,7 @@ export const WHY = {
     { num: '300+', title: 'partnered brokers in all states', text: 'We work with over 300 brokers across the U.S., ensuring efficient and reliable freight solutions nationwide.' },
     { num: '80+', title: 'drivers and owner operators', text: 'Our team includes more than 80 experienced drivers and owner-operators, guaranteeing timely and professional deliveries.' },
     { num: '20,000', title: 'total loads delivered in 2023', text: 'We have successfully completed over 20,000 deliveries in 2023 alone.' },
-    { num: '35', title: 'professional and educated employees', text: 'Our company is supported by 35 highly skilled and well-trained employees.' },
+    { num: '50', title: 'professional and educated employees', text: 'Our company is supported by 50 highly skilled and well-trained employees.' },
     { num: '3', title: 'years in operation with PO/VAN', text: 'We have been operating successfully with PO/VAN services for over three years.' },
   ],
 };
